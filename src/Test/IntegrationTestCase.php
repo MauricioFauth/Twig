@@ -11,6 +11,9 @@
 
 namespace Twig\Test;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhpunit;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
 use Twig\Error\Error;
@@ -85,21 +88,53 @@ abstract class IntegrationTestCase extends TestCase
     }
 
     /**
+     * @requires PHPUnit < 11
      * @dataProvider getTests
      */
+    #[RequiresPhpunit('< 11'), DataProvider('getTests')]
     public function testIntegration($file, $message, $condition, $templates, $exception, $outputs, $deprecation = '')
     {
         $this->doIntegrationTest($file, $message, $condition, $templates, $exception, $outputs, $deprecation);
     }
 
     /**
+     * @requires PHPUnit < 11
      * @dataProvider getLegacyTests
      *
      * @group legacy
      */
+    #[RequiresPhpunit('< 11'), DataProvider('getLegacyTests'), Group('legacy')]
     public function testLegacyIntegration($file, $message, $condition, $templates, $exception, $outputs, $deprecation = '')
     {
         $this->doIntegrationTest($file, $message, $condition, $templates, $exception, $outputs, $deprecation);
+    }
+
+    /**
+     * @requires PHPUnit >= 11
+     */
+    #[RequiresPhpunit('>= 11'), DataProvider('provideTests')]
+    public function testIntegrationTests($file, $message, $condition, $templates, $exception, $outputs, $deprecation = '')
+    {
+        $this->doIntegrationTest($file, $message, $condition, $templates, $exception, $outputs, $deprecation);
+    }
+
+    /**
+     * @requires PHPUnit >= 11
+     */
+    #[RequiresPhpunit('>= 11'), DataProvider('provideLegacyTests'), Group('legacy')]
+    public function testLegacyIntegrationTests($file, $message, $condition, $templates, $exception, $outputs, $deprecation = '')
+    {
+        $this->doIntegrationTest($file, $message, $condition, $templates, $exception, $outputs, $deprecation);
+    }
+
+    final public static function provideTests(): iterable
+    {
+        return self::assembleTests(false, static::getFixturesDirectory());
+    }
+
+    final public static function provideLegacyTests(): iterable
+    {
+        return self::assembleTests(true, static::getFixturesDirectory());
     }
 
     /**
@@ -114,6 +149,11 @@ abstract class IntegrationTestCase extends TestCase
             $fixturesDir = $this->getFixturesDir();
         }
 
+        return self::assembleTests($legacyTests, $fixturesDir);
+    }
+
+    private static function assembleTests(bool $legacyTests, string $fixturesDir): array
+    {
         $fixturesDir = realpath($fixturesDir);
         $tests = [];
 

@@ -13,6 +13,7 @@ namespace Twig\Test;
 
 use PHPUnit\Framework\Attributes\BeforeClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhpunit;
 use PHPUnit\Framework\TestCase;
 use Twig\Compiler;
 use Twig\Environment;
@@ -42,11 +43,21 @@ abstract class NodeTestCase extends TestCase
     }
 
     /**
+     * @requires PHPUnit < 11
      * @dataProvider getTests
      * @dataProvider provideTests
      */
-    #[DataProvider('getTests'), DataProvider('provideTests')]
+    #[RequiresPhpunit('< 11'), DataProvider('getTests'), DataProvider('provideTests')]
     public function testCompile($node, $source, $environment = null, $isPattern = false)
+    {
+        $this->assertNodeCompilation($source, $node, $environment, $isPattern);
+    }
+
+    /**
+     * @requires PHPUnit >= 11
+     */
+    #[RequiresPhpunit('>= 11'), DataProvider('provideTests')]
+    public function testNodeCompile($node, $source, $environment = null, $isPattern = false)
     {
         $this->assertNodeCompilation($source, $node, $environment, $isPattern);
     }
